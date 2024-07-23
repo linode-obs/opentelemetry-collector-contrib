@@ -80,9 +80,9 @@ type Config struct {
 	HeaderExtraction HeaderExtraction `mapstructure:"header_extraction"`
 
 	// The minimum bytes per fetch from Kafka (default "1")
-	MinFetchSize int32 `mapstructure:"min_fetch_size`
+	MinFetchSize int32 `mapstructure:"min_fetch_size"`
 	// The default bytes per fetch from Kafka (default "1024")
-	DefaultFetchSize int32 `mapstructure:"default_fetch_size`
+	DefaultFetchSize int32 `mapstructure:"default_fetch_size"`
 	// The maximum bytes per fetch from Kafka (default "0")
 	MaxFetchSize int32 `mapstructure:"max_fetch_size"`
 }
