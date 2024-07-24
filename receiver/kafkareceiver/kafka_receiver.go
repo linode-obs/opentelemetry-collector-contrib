@@ -120,6 +120,9 @@ func newTracesReceiver(config Config, set receiver.Settings, unmarshaler TracesU
 		headerExtraction:  config.HeaderExtraction.ExtractHeaders,
 		headers:           config.HeaderExtraction.Headers,
 		telemetryBuilder:  telemetryBuilder,
+		minFetchSize:      config.MinFetchSize,
+		defaultFetchSize:  config.DefaultFetchSize,
+		maxFetchSize:      config.MaxFetchSize,
 	}, nil
 }
 
@@ -246,6 +249,9 @@ func newMetricsReceiver(config Config, set receiver.Settings, unmarshaler Metric
 		headerExtraction:  config.HeaderExtraction.ExtractHeaders,
 		headers:           config.HeaderExtraction.Headers,
 		telemetryBuilder:  telemetryBuilder,
+		minFetchSize:      config.MinFetchSize,
+		defaultFetchSize:  config.DefaultFetchSize,
+		maxFetchSize:      config.MaxFetchSize,
 	}, nil
 }
 
@@ -340,6 +346,9 @@ func newLogsReceiver(config Config, set receiver.Settings, unmarshaler LogsUnmar
 		headerExtraction:  config.HeaderExtraction.ExtractHeaders,
 		headers:           config.HeaderExtraction.Headers,
 		telemetryBuilder:  telemetryBuilder,
+		minFetchSize:      config.MinFetchSize,
+		defaultFetchSize:  config.DefaultFetchSize,
+		maxFetchSize:      config.MaxFetchSize,
 	}, nil
 }
 
