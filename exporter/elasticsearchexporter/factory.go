@@ -7,7 +7,6 @@ package elasticsearchexporter // import "github.com/open-telemetry/opentelemetry
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -40,7 +39,7 @@ func NewFactory() exporter.Factory {
 }
 
 func createDefaultConfig() component.Config {
-	qs := exporterhelper.NewDefaultQueueSettings()
+	qs := exporterhelper.NewDefaultQueueConfig()
 	qs.Enabled = false
 
 	httpClientConfig := confighttp.NewDefaultClientConfig()
@@ -64,7 +63,7 @@ func createDefaultConfig() component.Config {
 		},
 		Retry: RetrySettings{
 			Enabled:         true,
-			MaxRequests:     3,
+			MaxRetries:      0, // default is set in exporter code
 			InitialInterval: 100 * time.Millisecond,
 			MaxInterval:     1 * time.Minute,
 			RetryOnStatus: []int{
@@ -111,12 +110,9 @@ func createLogsExporter(
 		set.Logger.Warn("index option are deprecated and replaced with logs_index and traces_index.")
 		index = cf.Index
 	}
-	logConfigDeprecationWarnings(cf, set.Logger)
+	handleDeprecatedConfig(cf, set.Logger)
 
-	exporter, err := newExporter(cf, set, index, cf.LogsDynamicIndex.Enabled)
-	if err != nil {
-		return nil, fmt.Errorf("cannot configure Elasticsearch exporter: %w", err)
-	}
+	exporter := newExporter(cf, set, index, cf.LogsDynamicIndex.Enabled)
 
 	return exporterhelper.NewLogsExporter(
 		ctx,
@@ -133,12 +129,10 @@ func createMetricsExporter(
 	cfg component.Config,
 ) (exporter.Metrics, error) {
 	cf := cfg.(*Config)
-	logConfigDeprecationWarnings(cf, set.Logger)
+	handleDeprecatedConfig(cf, set.Logger)
 
-	exporter, err := newExporter(cf, set, cf.MetricsIndex, cf.MetricsDynamicIndex.Enabled)
-	if err != nil {
-		return nil, fmt.Errorf("cannot configure Elasticsearch exporter: %w", err)
-	}
+	exporter := newExporter(cf, set, cf.MetricsIndex, cf.MetricsDynamicIndex.Enabled)
+
 	return exporterhelper.NewMetricsExporter(
 		ctx,
 		set,
@@ -150,15 +144,13 @@ func createMetricsExporter(
 
 func createTracesExporter(ctx context.Context,
 	set exporter.Settings,
-	cfg component.Config) (exporter.Traces, error) {
-
+	cfg component.Config,
+) (exporter.Traces, error) {
 	cf := cfg.(*Config)
-	logConfigDeprecationWarnings(cf, set.Logger)
+	handleDeprecatedConfig(cf, set.Logger)
 
-	exporter, err := newExporter(cf, set, cf.TracesIndex, cf.TracesDynamicIndex.Enabled)
-	if err != nil {
-		return nil, fmt.Errorf("cannot configure Elasticsearch exporter: %w", err)
-	}
+	exporter := newExporter(cf, set, cf.TracesIndex, cf.TracesDynamicIndex.Enabled)
+
 	return exporterhelper.NewTracesExporter(
 		ctx,
 		set,
@@ -192,7 +184,7 @@ func exporterhelperOptions(
 		//
 		// We keep timeout_sender enabled in the async mode (Batcher.Enabled == nil),
 		// to ensure sending data to the background workers will not block indefinitely.
-		opts = append(opts, exporterhelper.WithTimeout(exporterhelper.TimeoutSettings{Timeout: 0}))
+		opts = append(opts, exporterhelper.WithTimeout(exporterhelper.TimeoutConfig{Timeout: 0}))
 	}
 	return opts
 }
